@@ -70,7 +70,7 @@
 
         <div class="stat-grid home-stats">
           <div class="stat-card"><strong>{{ energies.length }}</strong><span>能源圖鑑</span></div>
-          <div class="stat-card"><strong>{{ questions.length }}</strong><span>後端題庫</span></div>
+          <div class="stat-card"><strong>{{ questions.length }}</strong><span>本次問答</span></div>
           <div class="stat-card"><strong>{{ playerSummary.totalPoints || 0 }}</strong><span>知識點數</span></div>
           <div class="stat-card"><strong>{{ leaderboard.length }}</strong><span>排行榜玩家</span></div>
         </div>
@@ -353,7 +353,19 @@ async function loadAll() {
   }
 }
 async function loadEnergies() { energies.value = await api('/api/energies'); }
-async function loadQuestions() { questions.value = await api('/api/questions'); if (demoMode.value) questions.value = [...questions.value].sort((a,b)=>a.id.localeCompare(b.id)); }
+const QUIZ_LIMIT = 10;
+
+async function loadQuestions() {
+  const query = demoMode.value
+    ? `limit=${QUIZ_LIMIT}`
+    : `limit=${QUIZ_LIMIT}&shuffle=1`;
+
+  questions.value = await api(`/api/questions?${query}`);
+
+  if (demoMode.value) {
+    questions.value = [...questions.value].sort((a, b) => a.id.localeCompare(b.id));
+  }
+}
 async function loadLeaderboard() { leaderboard.value = await api('/api/leaderboard'); }
 async function refreshPlayer() { playerSummary.value = await api(`/api/player/${encodeURIComponent(playerName.value || 'Demo玩家')}`); }
 async function loadStats() { systemStats.value = await api('/api/system-stats'); }

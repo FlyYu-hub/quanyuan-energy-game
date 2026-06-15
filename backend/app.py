@@ -1,5 +1,5 @@
 from __future__ import annotations
-
+import random
 from datetime import datetime, timezone
 import os
 from pathlib import Path
@@ -134,9 +134,25 @@ def energies():
 @app.route("/api/questions")
 def questions():
     rows = read_json("questions", [])
+
     level = request.args.get("level")
     if level:
         rows = [q for q in rows if q.get("level") == level]
+
+    shuffle = request.args.get("shuffle", "0").lower() in ("1", "true", "yes")
+
+    try:
+        limit = int(request.args.get("limit", 0))
+    except ValueError:
+        limit = 0
+
+    if shuffle:
+        rows = rows[:]
+        random.shuffle(rows)
+
+    if limit > 0:
+        rows = rows[:limit]
+
     return ok(rows)
 
 
